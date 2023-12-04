@@ -1,0 +1,29 @@
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: AlertmanagerConfig
+metadata:
+  name: alert-config
+  labels:
+    resource: prometheus
+spec:
+  route:
+    groupBy: ['severity']
+    groupWait: 10s
+    groupInterval: 5m
+    repeatInterval: 12h
+    continue: true
+    matchers:
+      - name: severity
+        matchType: "="
+        value: "critical"
+    receiver: slackNotifications
+  receivers:
+    - name: slackNotifications
+      slackConfigs:
+        - apiURL:
+            key: slackWebhook
+            name: alertmanager-slack-notification
+          channel: '#prometheus-alerts'
+          sendResolved: true
+          title: 'title'
+          text: 'app down'
+          footer: "footer"

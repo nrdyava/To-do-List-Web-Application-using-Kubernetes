@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: flaskapp
+  name: todo-flask-app
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: flaskapp
+  template:
+    metadata:
+      labels:
+        app: flaskapp
+    spec:
+      containers:
+      - name: flask-app
+        image: nrdyava/flask-app:allll
+        ports:
+        - containerPort: 5000
+        imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+
+        readinessProbe:
+          httpGet:
+            path: /live
+            port: 5000
+          initialDelaySeconds: 15
+          periodSeconds: 5
+
+        env:
+          - name: FLASK_ENV
+            value: development
+          - name: MONGO_HOST
+            value: mongo
+          - name: MONGO_PORT
+            value: "27017"
+          - name: PORT
+            value: "5000"
+  strategy:
+   type: RollingUpdate
+   rollingUpdate:
+     maxUnavailable: 1
+
+        

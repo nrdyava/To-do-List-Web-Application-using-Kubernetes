@@ -1,0 +1,24 @@
+docker buildx build --platform linux/amd64,linux/arm64 -t nrdyava/flask-app:latest --push .
+docker buildx build --platform linux/amd64,linux/arm64 -t nrdyava/flask-app:crash --push .
+
+
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm install prometheus prometheus-community/kube-prometheus-stack
+
+kubectl apply -f mongodb-pv.yaml
+kubectl apply -f mongodb-pvc.yaml
+kubectl apply -f mongodb-deployment.yaml
+kubectl apply -f mongodb-service.yaml
+kubectl apply -f flask-deployment.yaml
+kubectl apply -f flask-service.yaml
+kubectl apply -f down-rule.yaml
+helm upgrade prometheus prometheus-community/kube-prometheus-stack -f values.yaml
+kubectl apply -f slack-secret.yaml
+kubectl apply -f alert.yaml
+
+
+
+kubectl port-forward prometheus-prometheus-kube-prometheus-prometheus-0 8080:9090
+kubectl delete deployment todo-flask-app
+Kubectl port-forward service/alertmanager-operated 8081:9093
+
